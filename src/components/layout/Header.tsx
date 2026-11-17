@@ -254,18 +254,6 @@ export function Header() {
                 </div>
               </div>
             ))}
-                    <Link
-                      key={sub}
-                      href={`/category/${cat.slug}?sub=${encodeURIComponent(sub)}`}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block text-xs text-slate-600 dark:text-slate-400 py-0.5"
-                    >
-                      {sub}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
 
             <div className="pt-2 border-t border-stone-200 dark:border-slate-800 flex flex-col space-y-2">
               <Link
