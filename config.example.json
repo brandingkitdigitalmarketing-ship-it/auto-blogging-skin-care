@@ -1,0 +1,20 @@
+{
+  "wordpress": {
+    "siteUrl": "https://your-wordpress-site.com",
+    "username": "your-wp-username",
+    "applicationPassword": "xxxx xxxx xxxx xxxx",
+    "postStatus": "draft"
+  },
+  "ai": {
+    "provider": "builtin",
+    "geminiApiKey": "",
+    "openaiApiKey": "",
+    "model": "gemini-1.5-flash"
+  },
+  "publishing": {
+    "scheduleHour": 9,
+    "scheduleMinute": 0,
+    "timeZone": "Asia/Kolkata",
+    "uploadFeaturedImage": true
+  }
+}

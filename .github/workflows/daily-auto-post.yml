@@ -1,0 +1,50 @@
+name: Daily WordPress Auto-Post
+
+on:
+  schedule:
+    # Runs every day at 03:30 UTC (09:00 AM IST)
+    - cron: '30 3 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI anytime
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate and Post to WordPress
+        env:
+          WP_URL: ${{ secrets.WP_URL }}
+          WP_USERNAME: ${{ secrets.WP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            if (process.env.WP_URL) {
+              const cfg = JSON.parse(fs.readFileSync("config.json", "utf-8"));
+              cfg.wordpress.siteUrl = process.env.WP_URL;
+              cfg.wordpress.username = process.env.WP_USERNAME || cfg.wordpress.username;
+              cfg.wordpress.applicationPassword = process.env.WP_APP_PASSWORD || cfg.wordpress.applicationPassword;
+              if (process.env.GEMINI_API_KEY) {
+                cfg.ai.provider = "gemini";
+                cfg.ai.geminiApiKey = process.env.GEMINI_API_KEY;
+              }
+              fs.writeFileSync("config.json", JSON.stringify(cfg, null, 2));
+            }
+          '
+          node post-now.js
+
+      - name: Commit Updated Publishing History
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add history.json
+          git commit -m "Auto-published daily blog post [skip ci]" || exit 0
+          git push

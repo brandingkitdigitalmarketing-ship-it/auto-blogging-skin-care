@@ -1,0 +1,46 @@
+name: Daily AI Skincare Article Auto-Publisher
+
+on:
+  schedule:
+    # 1. Morning Edition: 03:30 UTC (09:00 AM IST)
+    - cron: '30 3 * * *'
+    # 2. Afternoon Edition: 07:30 UTC (01:00 PM IST)
+    - cron: '30 7 * * *'
+    # 3. Evening Edition: 12:30 UTC (06:00 PM IST)
+    - cron: '30 12 * * *'
+  workflow_dispatch: # Allows manual 1-click trigger from GitHub Actions tab
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Trigger Publication via Live Web API (if site is live)
+        if: env.SITE_URL != ''
+        env:
+          SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          echo "Pinging publication endpoint at ${SITE_URL}/api/cron..."
+          curl -X POST "${SITE_URL}/api/cron" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Content-Type: application/json" || echo "Website ping completed or handled offline."
+
+      - name: Setup Node.js (Fallback Offline Publisher)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Auto-Pilot Engine
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          WP_URL: ${{ secrets.WP_URL }}
+          WP_USERNAME: ${{ secrets.WP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+        run: |
+          node -e '
+            console.log("Auto-Pilot Publishing Routine Triggered at " + new Date().toISOString());
+          '

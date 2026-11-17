@@ -1,0 +1,32 @@
+name: Deploy to Hostinger Production
+
+on:
+  push:
+    branches:
+      - main
+      - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Hostinger Server via SSH
+        uses: appleboy/ssh-action@master
+        if: env.HOSTINGER_SSH_HOST != ''
+        env:
+          HOSTINGER_SSH_HOST: ${{ secrets.HOSTINGER_SSH_HOST }}
+        with:
+          host: ${{ secrets.HOSTINGER_SSH_HOST }}
+          username: ${{ secrets.HOSTINGER_SSH_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_SSH_PORT || 22 }}
+          script: |
+            cd ~/public_html || cd /var/www/derma-journal
+            git pull origin main
+            npm install --production=false
+            npm run build
+            pm2 reload ecosystem.config.js || pm2 start ecosystem.config.js
+            echo "Deployment to Hostinger completed successfully!"
