@@ -3,10 +3,13 @@ const { parse } = require('url');
 const next = require('next');
 
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = process.env.HOST || '0.0.0.0';
-const port = parseInt(process.env.PORT, 10) || 3000;
+const rawPort = process.env.PORT;
+const port = rawPort ? (isNaN(Number(rawPort)) ? rawPort : Number(rawPort)) : 3000;
 
-const app = next({ dev, hostname, port });
+const app = next({
+  dev,
+  port: typeof port === 'number' ? port : undefined
+});
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
@@ -25,6 +28,6 @@ app.prepare().then(() => {
       process.exit(1);
     })
     .listen(port, () => {
-      console.log(`> Lumière Derma Journal ready on http://${hostname}:${port}`);
+      console.log(`> Lumière Derma Journal ready and listening on ${port}`);
     });
 });
