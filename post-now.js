@@ -105,7 +105,8 @@ async function run() {
     tagNames: article.tags,
     status: postStatus,
     imageUrl: config.publishing?.uploadFeaturedImage !== false ? article.imageUrl : null,
-    imageAlt: article.imageAlt
+    imageAlt: article.imageAlt,
+    slug: article.slug
   });
 
   console.log('\n==================================================');
