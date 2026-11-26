@@ -180,7 +180,7 @@ class WordPressClient {
   /**
    * Create a WordPress post
    */
-  async createPost({ title, content, excerpt, categoryName, tagNames, status = 'draft', imageUrl, imageAlt }) {
+  async createPost({ title, content, excerpt, categoryName, tagNames, status = 'draft', imageUrl, imageAlt, slug, meta }) {
     let categoryId = null;
     if (categoryName) {
       categoryId = await this.getOrCreateCategory(categoryName);
@@ -205,6 +205,9 @@ class WordPressClient {
       tags: tagIds,
       featured_media: featuredMediaId || 0
     };
+
+    if (slug) postPayload.slug = slug;
+    if (meta) postPayload.meta = meta;
 
     const postUrl = `${this.siteUrl}/wp-json/wp/v2/posts`;
     const res = await fetch(postUrl, {
